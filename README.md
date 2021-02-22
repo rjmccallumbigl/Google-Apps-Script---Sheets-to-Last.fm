@@ -71,6 +71,6 @@ Import tracks from a spreadsheet to your Last.FM
   ```
 11. Change the variable `sheetName` to whatever the name of your sheet is. 
 12. Run the function primaryFunction() to authenticate the script and confirm it works. Head to your Last.fm and confirm the scrobbles. Head to your sheet to see if the first few tracks got checked off. It should look something like this: 
-![screenshot of my sheet](https://github.com/rjmccallumbigl/Google-Apps-Script---Sheets-to-Last.fm/blob/main/screenshot.png?raw=true]
+![screenshot of my sheet](https://raw.githubusercontent.com/rjmccallumbigl/Google-Apps-Script---Sheets-to-Last.fm/main/screenshot.png)
 13. Create a new trigger with the following parameters: **primaryFunction(), Time-driven, Minutes timer, Every minute**. Now the script will run once a minute. You can delete this trigger if you need to troubleshoot without receiving a new email every minute.
 14. TODO: will automate the part with the trigger.
