@@ -79,8 +79,8 @@ function scrobbleTracks(numOfTracks) {
   var currentRow = Number(scriptProperties.getProperty("currentRow"));
   console.log("Current row is " + currentRow);
   // var currentRow = 1; //DEBUG
-  var ryanmcslomo = {
-    "username": "ryanmcslomo",
+  var ryanmcslomo = { // Change if you'd like =D
+    "username": "INSERT USERNAME HERE",
     "password": "INSERT PASSWORD HERE",
     "api_key": "INSERT API KEY HERE",
     "secret": "INSERT SECRET HERE"
