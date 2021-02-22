@@ -10,7 +10,7 @@ function primaryFunction() {
   // https://developers.google.com/apps-script/guides/services/quotas
   var numOfTracks = 16;
 
-  // Name of the sheet with our Last.fm tracks
+  // Name of the sheet with our Last.fm tracks, change to your sheet name
   var sheetName = "https://lastfm.ghan.nl/export/";
 
   // Run our script, if it fails retry with 10 tracks...then 1...then send an email asking for help
