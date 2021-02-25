@@ -16,9 +16,10 @@ Import tracks from a spreadsheet to your Last.FM
 
 ## Caveats
 
-1. You can only scrobble so many songs at a time using this script because the URL length within the URLFetchApp function (used in the API call) cannot exceed the limit of 2KB or the script will fail. Right now 15 songs seems to be a good number (20 almost always fails, 16-19 is a crapshoot). When the URL string has too much data, the script will try 10 songs instead, and then 1 in hopes of passing the tracks generating all the extra data on to Last.fm via the API. Basically, if you have a lot of songs like I do, it may still take a long time to get them all scrobbled.
-2. There is a daily limit to the number of total tracks scrobbled via API calls, I think it's 2800 as of Feb 2021.
-3. The script occasionally failed generating a good API signature due to non-English characters in the track information (artist name, track name, etc). Thus, make sure you convert non-english characters to English and remove weird text stuff manually:
+1. Your password is plainly saved in this script.
+2. You can only scrobble so many songs at a time using this script because the URL length within the URLFetchApp function (used in the API call) cannot exceed the limit of 2KB or the script will fail. Right now 15 songs seems to be a good number (20 almost always fails, 16-19 is a crapshoot). When the URL string has too much data, the script will try 10 songs instead, and then 1 in hopes of passing the tracks generating all the extra data on to Last.fm via the API. Basically, if you have a lot of songs like I do, it may still take a long time to get them all scrobbled.
+3. There is a daily limit to the number of total tracks scrobbled via API calls, I think it's 2800 as of Feb 2021.
+4. The script occasionally failed generating a good API signature due to non-English characters in the track information (artist name, track name, etc). Thus, make sure you convert non-english characters to English and remove weird text stuff manually:
    * The artist "緑" becomes "Mr. Green"
    * The song "Project Pat (feat. Daz Léone)" by Supa Dupa Humble becomes "Project Pat (feat. Daz Leone)"
    
