@@ -22,7 +22,7 @@ Import tracks from a spreadsheet to your Last.FM
    * The artist "緑" becomes "Mr. Green"
    * The song "Project Pat (feat. Daz Léone)" by Supa Dupa Humble becomes "Project Pat (feat. Daz Leone)"
    
-        ...and so forth. Looking for a good way to automate this, but for now I just did the following:
+    ...and so forth. Looking for a good way to automate this, but for now I just did the following:
   
    1. In a new Google Doc, I inserted special variations for each vowel using the "Insert special characters" functionality:
 
