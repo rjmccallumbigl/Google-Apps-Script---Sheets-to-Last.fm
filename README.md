@@ -1,6 +1,14 @@
 # Google-Apps-Script---Sheets-to-Last.fm
 Import tracks from a spreadsheet to your Last.FM
 
+## Table of Contents
+- [Use case](#Use-case)
+- [Work flow](#Work-flow)
+- [Caveats](#Caveats)
+- [Steps-for-Usage](#Steps-for-Usage)
+- [Errors](#Errors)
+- [TODO](#TODO)
+
 ## Use case
 
 * Synchronize scrobbles between accounts
@@ -52,10 +60,10 @@ Import tracks from a spreadsheet to your Last.FM
       * Yall artists need to standardize this madness! You're making it hell on the fans obsessed with coordinating their music library 😂.
 
 ## Steps for Usage
-1. Export your scrobbles to a CSV using this wonderful site: https://lastfm.ghan.nl/export/
-2. Import them into a new Google Sheet.
+1. Export your scrobbles to a CSV using this wonderful site: https://lastfm.ghan.nl/export/. Import them into a new Google Sheet.
+2. If you want to scrobble new tracks from a sheet instead, create a new sheet 
 3. Create a new column for checkmarks (the tracks will be checked off as the script operates). At this point, the column headers should be **uts, utc_time, artist, artist_mbid, album, album_mbid, track, track_mbid, and Scrobbled**.
-4. Create a Last.fm API account for the account you want to use for automatic scrobbles: https://www.last.fm/api/account/create. Make sure it has a _Contact email, Application name, and Application description_. When you're finished, **save the API key and Shared secret somewhere**. Treat them like a password.
+4. Create a Last.fm API account for the account you want to use for automatic scrobbles: https://www.last.fm/api/account/create. Make sure it has a _Contact email, Application name, and Application description_. When you're finished, **save the API key and Shared secret somewhere**. Treat them like a password (as in, don't give them to a stranger, I'm aware it's crazy to put your password in this script as well). 
 5. Create a new Google Script for your Google Sheet. Click Tools -> Script Editor and delete the script there. 
 6. Paste the script here: https://github.com/rjmccallumbigl/Google-Apps-Script---Sheets-to-Last.fm/blob/main/lastfm/Code.gs
 7. Create a new .gs script file and paste this script: https://github.com/rjmccallumbigl/Google-Apps-Script---Sheets-to-Last.fm/blob/main/lastfm/deleteColumnsOrRows.gs
@@ -84,7 +92,7 @@ Import tracks from a spreadsheet to your Last.FM
 
 ## TODO
 
-  * Possible fix is to replace all non ascii characters with their standard equivalents automatically using RegEx
+  * Possible fix for [error #1](#Errors) is to replace all non ascii characters with their standard equivalents automatically using RegEx
     - https://stackoverflow.com/questions/150033/regular-expression-to-match-non-ascii-characters
       - [^\x00-\x7F]+
       - [^\u0000-\u007F]+
