@@ -77,10 +77,10 @@ Import tracks from a spreadsheet to your Last.FM
 ## Errors
 
 1. This error indicates the API failed to parse a track
-  * Exception: Request failed for http://ws.audioscrobbler.com returned code 400. Truncated server response: {"error":13,"message":"Invalid method signature supplied"} (use muteHttpExceptions option to examine full response) 
+    * `Exception: Request failed for http://ws.audioscrobbler.com returned code 400. Truncated server response: {"error":13,"message":"Invalid method signature supplied"} (use muteHttpExceptions option to examine full response)`
 
 2. This error indicates you rate limited the API and have to wait a day to continue
-  * Exception: Request failed for http://ws.audioscrobbler.com returned code 429. Truncated server response: {"error":29,"message":"Rate Limit Exceeded - Too many scrobbles in a short period. Please try again later."} (use muteHttpExceptions option to examine full response) 
+      * `Exception: Request failed for http://ws.audioscrobbler.com returned code 429. Truncated server response: {"error":29,"message":"Rate Limit Exceeded - Too many scrobbles in a short period. Please try again later."} (use muteHttpExceptions option to examine full response)`
 
 ## TODO
 
