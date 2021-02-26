@@ -69,10 +69,10 @@ Import tracks from a spreadsheet to your Last.FM
 3. Create a new column to the right for checkboxes called **Scrobbled?** (the tracks will be checked off as the script operates). At this point, the column headers should be **uts, utc_time, artist, artist_mbid, album, album_mbid, track, track_mbid, and Scrobbled?**. _Working on a new sheet?_ Add these 9 items as column headers. Fill out the following required parameters (at minimum) for a track in the next line (each row is equal to one track): 
   - **artist**: name of the artist(s)
   - **track**: name of the track
-  - **uts**: time the track started playing as a UTC UNIX timestamp. Examples: 
+  - **uts**: time the track started playing as a UTC UNIX timestamp (epoch format, or seconds passed since January 1, 1970 Midnight UTC not counting leap seconds). Examples: 
       - https://time.is/Unix_time_now
       - https://www.epochconverter.com/
-      - `=("2/25/2021"-DATE(1970,1,1))*86400` or `=(now()-DATE(1970,1,1))*86400` on the Google Sheet. replace the date and/or add time as needed
+      - `=("2/25/2021"-DATE(1970,1,1))*86400` or `=(now()-DATE(1970,1,1))*86400` on the Google Sheet. Replace the date and/or add time as needed.
 4. Create a Last.fm API account for the account you want to use for automatic scrobbles: https://www.last.fm/api/account/create. Make sure it has a _Contact email, Application name, and Application description_. When you're finished, **save the API key and Shared secret somewhere**. Treat them like a password (as in, don't give them to a stranger, I'm aware it's crazy to put your password in this script as well). 
 5. Create a new Google Script for your Google Sheet. Click Tools -> Script Editor and delete the script there. 
 6. Paste the script here: https://github.com/rjmccallumbigl/Google-Apps-Script---Sheets-to-Last.fm/blob/main/lastfm/Code.gs
