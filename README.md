@@ -71,7 +71,37 @@ Import tracks from a spreadsheet to your Last.FM
   };
   ```
 11. Change the variable `sheetName` to whatever the name of your sheet is. 
-12. Run the function primaryFunction() to authenticate the script and confirm it works. Head to your Last.fm and confirm the scrobbles. Head to your sheet to see if the first few tracks got checked off. It should look something like this: 
+12. Run the function primaryFunction() to authenticate the script and confirm it works. Head to your Last.fm and confirm the scrobbles. Confirm the trigger was created so the script runs once a minute. Head to your sheet to see if the first few tracks got checked off. It should look something like this: 
 ![screenshot of my sheet](https://raw.githubusercontent.com/rjmccallumbigl/Google-Apps-Script---Sheets-to-Last.fm/main/screenshot.png)
-13. Create a new trigger with the following parameters: **primaryFunction(), Time-driven, Minutes timer, Every minute**. Now the script will run once a minute. You can delete this trigger if you need to troubleshoot without receiving a new email every minute.
-14. TODO: will automate the part with the trigger.
+
+## Errors
+
+1. This error indicates the API failed to parse a track
+  * Exception: Request failed for http://ws.audioscrobbler.com returned code 400. Truncated server response: {"error":13,"message":"Invalid method signature supplied"} (use muteHttpExceptions option to examine full response) 
+
+2. This error indicates you rate limited the API and have to wait a day to continue
+  * Exception: Request failed for http://ws.audioscrobbler.com returned code 429. Truncated server response: {"error":29,"message":"Rate Limit Exceeded - Too many scrobbles in a short period. Please try again later."} (use muteHttpExceptions option to examine full response) 
+
+## TODO
+
+  * Possible fix is to replace all non ascii characters with their standard equivalents automatically using RegEx
+    - https://stackoverflow.com/questions/150033/regular-expression-to-match-non-ascii-characters
+      - [^\x00-\x7F]+
+      - [^\u0000-\u007F]+
+      - [\u00C0-\u1FFF\u2C00-\uD7FF]
+      - [\u00BF-\u1FFF\u2C00-\uD7FF]
+      - [\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]
+    - https://bytefreaks.net/programming-2/javascript/javasript-remove-all-non-printable-and-all-non-ascii-characters-from-text
+      - [^ -~]+
+    - https://stackoverflow.com/questions/20856197/remove-non-ascii-character-in-string
+      - [\x00-\x08\x0E-\x1F\x7F-\uFFFF]
+    - https://stackoverflow.com/questions/2668854/sanitizing-strings-to-make-them-url-and-filename-safe
+      - Might be the best bet
+        - https://stackoverflow.com/a/17186583/7954017
+        - https://stackoverflow.com/a/7031325/7954017
+        - https://stackoverflow.com/a/2727693/7954017
+    - https://stackoverflow.com/questions/756567/regular-expression-for-excluding-special-characters/33966062
+      - https://stackoverflow.com/a/1499398/7954017
+    - https://stackoverflow.com/questions/2670037/how-to-remove-invalid-utf-8-characters-from-a-javascript-string
+      - `var bytelike = unescape(encodeURIComponent(characters));`
+      - `var characters = decodeURIComponent(escape(bytelike));`
