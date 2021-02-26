@@ -10,52 +10,101 @@ function primaryFunction() {
   // https://developers.google.com/apps-script/guides/services/quotas
   var numOfTracks = 16;
 
-  // Name of the sheet with our Last.fm tracks, change to your sheet name
+  // Name of the sheet with our Last.fm tracks
   var sheetName = "https://lastfm.ghan.nl/export/";
 
-  // Run our script, if it fails retry with 10 tracks...then 1...then send an email asking for help
+  // Declare variables for error messaging
+  var errorString = "Scrobbling 1 track failed, check spreadsheet for broken track entry (maybe with the artist/album/track name)";
+  var scriptProperties = PropertiesService.getScriptProperties();
+  var currentRowProp = scriptProperties.getProperty("currentRow");
+
+  // If currentRow prop doesn't exist, set to first row
+  if (currentRowProp == null) {
+    currentRowProp = scriptProperties.setProperty("currentRow", 1);
+  }
+
+  var currentRow = Number(currentRowProp);
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getSheetByName(sheetName);
+  var spreadsheetURL = spreadsheet.getUrl();
+  var sheetGID = sheet.getSheetId();
+  var rangeNotation = "A" + (currentRow + 1) + ":I" + (currentRow + 1);
+  var trackURL = spreadsheetURL + "#gid=" + sheetGID + "&range=" + rangeNotation;
+  var emailBody = "";
+  var rangeA1 = sheet.getRange("A1");
+  var rangeA1Value = rangeA1.getDisplayValue();
+  var rangeA1Note = (rangeA1.getNote() ? rangeA1.getNote() : rangeA1.setNote("URL to last entry"));
+
+  // Run our script, if it fails, retry with 10 tracks...then 1...then send an email asking for help if we need it
   try {
-    scrobbleTracks(numOfTracks);
+    scrobbleTracks(numOfTracks, scriptProperties);
+    checkTrigger(scriptProperties, "minute");
   } catch (e) {
-    console.log("Scrobbling " + numOfTracks + " tracks failed, trying 10");
+    console.log("Scrobbling " + (numOfTracks - 1) + " tracks failed, trying 10");
     console.log(e);
+    checkTrigger(scriptProperties, "minute");
     try {
-      scrobbleTracks(11);
+      scrobbleTracks(11, scriptProperties);
     } catch (e) {
       console.log("Scrobbling 10 tracks failed, trying 1");
       console.log(e);
+      checkTrigger(scriptProperties, "minute");
       try {
-        scrobbleTracks(2);
+        scrobbleTracks(2, scriptProperties);
       } catch (e) {
-
-        // Declare variables for error messaging
-        var errorString = "Scrobbling 1 track failed, check spreadsheet for broken track entry (maybe with the artist/album/track name)";
-        var scriptProperties = PropertiesService.getScriptProperties();
-        var currentRow = Number(scriptProperties.getProperty("currentRow"));
-        var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-        var spreadsheetURL = spreadsheet.getUrl();
-        var sheetGID = spreadsheet.getSheetByName(sheetName).getSheetId();
-        var errorURL = spreadsheetURL + "#gid=" + sheetGID + "&range=A" + (currentRow + 1) + ":I" + (currentRow + 1);
-
         // Log errors for manual fixing
         console.error(errorString);
-        console.error(errorURL);
+        console.error(trackURL);
         console.error(e);
 
-        // Send email with this update
-        MailApp.sendEmail(Session.getEffectiveUser().getEmail(),
-          "Error in the script for " + SpreadsheetApp.getActiveSpreadsheet().getName(),
-          "Error: " + errorString + "\n " + errorURL);
+        /**
+         * This error indicates the API failed to parse a track
+         * ================================================================================
+         * Exception: Request failed for http://ws.audioscrobbler.com returned code 
+         * 400. Truncated server response: {"error":13,"message":"Invalid method 
+         * signature supplied"} (use muteHttpExceptions option to examine full 
+         * response) 
+         * 
+         * This error indicates you rate limited the API and have to wait a day to continue
+         * ================================================================================
+         * Exception: Request failed for http://ws.audioscrobbler.com returned code 
+         * 429. Truncated server response: {"error":29,"message":"Rate Limit Exceeded 
+         * - Too many scrobbles in a short period. Please try again later."} (use 
+         * muteHttpExceptions option to examine full response) 
+         * 
+         **/
+         
+        // If reached API limit, automate trigger to wait 1 day to reset API limit
+        if (String(e).indexOf('"error":29') > -1) {
+          checkTrigger(scriptProperties, "day");
+        }
+
+        // Send email with the latest error
+        emailBody = "Error: " + errorString + "\n\n" + "Track: " + sheet.getRange(rangeNotation).getDisplayValues().join(" | ") + "\n\n" + e + "\n\n" + trackURL;
+        console.log(emailBody);
+
+        // MailApp.sendEmail(Session.getEffectiveUser().getEmail(), "Error in the script for " + spreadsheet.getName(), emailBody);
         //ErrorMessage; // Actually log a failure via the Trigger by calling a not-defined function, commenting out for now
-        console.log("Sent email!");
+        // console.log("Sent email!");
+
+        //  Skip broken track if something's up with the text, set property for next run by iterating the currentRow property
+        if (String(e).indexOf('"error":13') > -1) {
+          scriptProperties.setProperty("currentRow", currentRow + 1);
+        }
       }
     }
   }
+
+  // Update A1 with our last run track's hyperlink for easy direct access
+  rangeA1.setValue('=HYPERLINK("' + trackURL + '", "' + rangeA1Value + '")');
 }
 
 /****************************************************************************************************************************************
 *
 * Scrobble tracks from sheet to Last.FM.
+*
+* @params numOfTracks {Number} However many tracks we're attempting to scrobble at one time
+* @params scriptProperties {Object} Current properties of script, persists per session until overwritten
 *
 * References
 * https://www.last.fm/api/show/track.scrobble
@@ -64,22 +113,22 @@ function primaryFunction() {
 *
 ****************************************************************************************************************************************/
 
-function scrobbleTracks(numOfTracks) {
+function scrobbleTracks(numOfTracks, scriptProperties) {
 
   // DEBUG
   // var scriptProperties = PropertiesService.getScriptProperties();
   // scriptProperties.setProperty("currentRow", 31);
   // console.log(Number(scriptProperties.getProperty("currentRow")))
+  // var setScrobbleLimit = 2; // Do one at a time  
+  // var currentRow = 1; //DEBUG
 
   //  Declare variables
   var setScrobbleLimit = numOfTracks;
-  // var setScrobbleLimit = 2; // DEBUG, do one at a time
-  var scriptProperties = PropertiesService.getScriptProperties();
   var sheetName = "https://lastfm.ghan.nl/export/";
   var currentRow = Number(scriptProperties.getProperty("currentRow"));
   console.log("Current row is " + currentRow);
-  // var currentRow = 1; //DEBUG
-  var ryanmcslomo = { // Change if you'd like =D
+
+var ryanmcslomo = { // Change if you'd like =D
     "username": "INSERT USERNAME HERE",
     "password": "INSERT PASSWORD HERE",
     "api_key": "INSERT API KEY HERE",
@@ -180,8 +229,7 @@ function stringifyAPIURL(gotTracks, lastFMAuth, setScrobbleLimit) {
     var track = encodeURIComponent(gotTracks.arrayOfTracks[x].track);
     var album = encodeURIComponent(gotTracks.arrayOfTracks[x].album);
     var mbid = encodeURIComponent(gotTracks.arrayOfTracks[x].mbid);
-    // leaving out since counting the timestamp too long ago ignores the track with ignoredMessage:{"code":"1"}
-    // var timestamp = Math.floor(gotTracks.arrayOfTracks[x].timestamp); 
+    // var timestamp = Math.floor(gotTracks.arrayOfTracks[x].timestamp); // leaving out, counting timestamp too long ago ignores track - ignoredMessage:{"code":"1"}
     var arrayEntry = "[" + (x - 1) + "]"; // necessary for batch API calls
 
     // Construct parameters for API signature
@@ -191,8 +239,7 @@ function stringifyAPIURL(gotTracks, lastFMAuth, setScrobbleLimit) {
     params["track" + arrayEntry] = gotTracks.arrayOfTracks[x].track;
     params["artist" + arrayEntry] = gotTracks.arrayOfTracks[x].artist;
     params["timestamp" + arrayEntry] = timestamp;
-    // leaving out since counting the timestamp too long ago ignores the track with ignoredMessage:{"code":"1"}
-    // params.timestamp = gotTracks.arrayOfTracks[x].timestamp; 
+    // params.timestamp = gotTracks.arrayOfTracks[x].timestamp; // leaving out, counting timestamp too long ago ignores track - ignoredMessage:{"code":"1"}
 
     // Optional adds since the tracks may not have an album or mbid
     if (album) {
