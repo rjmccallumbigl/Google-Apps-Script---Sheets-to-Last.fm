@@ -2,6 +2,8 @@
 *
 * Run the function, with the default number of tracks per scrobble attempt. Upon failure, will keep trying with less tracks per attempt.
 *
+* https://github.com/rjmccallumbigl/Google-Apps-Script---Sheets-to-Last.fm
+*
 ****************************************************************************************************************************************/
 
 function primaryFunction() {
