@@ -27,6 +27,7 @@ function primaryFunction() {
 
   var currentRow = Number(currentRowProp);
   var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var spreadsheetName = spreadsheet.getName();
   var sheet = spreadsheet.getSheetByName(sheetName);
   var spreadsheetURL = spreadsheet.getUrl();
   var sheetGID = sheet.getSheetId();
@@ -36,6 +37,9 @@ function primaryFunction() {
   var rangeA1 = sheet.getRange("A1");
   var rangeA1Value = rangeA1.getDisplayValue();
   var rangeA1Note = (rangeA1.getNote() ? rangeA1.getNote() : rangeA1.setNote("URL to last entry"));
+  var userEmail = Session.getEffectiveUser().getEmail();
+  var displayRange = sheet.getRange(rangeNotation);
+  var displayRangeValues = displayRange.getDisplayValues();
 
   // Run our script, if it fails, retry with 10 tracks...then 1...then send an email asking for help if we need it
   try {
@@ -52,10 +56,10 @@ function primaryFunction() {
       console.log(e);
       checkTrigger(scriptProperties, "minute");
       try {
-        scrobbleTracks(2, scriptProperties);
+        // ErrorMessage; // DEBUG, actually log a failure via the Trigger by calling a not-defined function
+        scrobbleTracks(2, scriptProperties);        
       } catch (e) {
-        // Log errors for manual fixing
-        console.error(errorString);
+        // Log errors for manual fixing        
         console.error(trackURL);
         console.error(e);
 
@@ -75,23 +79,22 @@ function primaryFunction() {
          * muteHttpExceptions option to examine full response) 
          * 
          **/
-         
+
         // If reached API limit, automate trigger to wait 1 day to reset API limit
         if (String(e).indexOf('"error":29') > -1) {
           checkTrigger(scriptProperties, "day");
-        }
-
-        // Send email with the latest error
-        emailBody = "Error: " + errorString + "\n\n" + "Track: " + sheet.getRange(rangeNotation).getDisplayValues().join(" | ") + "\n\n" + e + "\n\n" + trackURL;
-        console.log(emailBody);
-
-        // MailApp.sendEmail(Session.getEffectiveUser().getEmail(), "Error in the script for " + spreadsheet.getName(), emailBody);
-        //ErrorMessage; // Actually log a failure via the Trigger by calling a not-defined function, commenting out for now
-        // console.log("Sent email!");
-
-        //  Skip broken track if something's up with the text, set property for next run by iterating the currentRow property
-        if (String(e).indexOf('"error":13') > -1) {
+        } else if (String(e).indexOf('"error":13') > -1) {
+          //  Skip broken track if something's up with the text, set property for next run by iterating the currentRow property        
+          console.error(errorString);
           scriptProperties.setProperty("currentRow", currentRow + 1);
+        } else {
+          // If the error doesn't match the above two, email me an update for whatever the issue is
+          emailBody = "Track: " + displayRangeValues.join(" | ") + "\n\n" + e + "\n\n" + trackURL;
+          console.log(emailBody);
+
+          // Compose email with the latest error
+          MailApp.sendEmail(userEmail, "Error in the script for " + spreadsheetName, emailBody);          
+          console.log("Sent email!");
         }
       }
     }
